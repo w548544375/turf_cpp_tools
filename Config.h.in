@@ -1,0 +1,2 @@
+#define Sephiroth_VERSION_MAJOR @SephirothServer_VERSION_MAJOR@
+#define Sephiroth_VERSION_MINOR @SephirothServer_VERSION_MINOR@
