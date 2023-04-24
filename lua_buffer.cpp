@@ -88,6 +88,7 @@ int l_ToString(lua_State *L) {
 
 int l_getByte(lua_State *L) {
   Buffer *buf = GetBuffer(L, 1);
+
   lua_pushinteger(L, buf->GetByte());
   return 1;
 }
@@ -118,7 +119,7 @@ int l_getLong(lua_State *L) {
 
 int l_getDouble(lua_State *L) {
   Buffer *buf = GetBuffer(L, 1);
-  lua_pushinteger(L, buf->GetDouble());
+  lua_pushnumber(L, buf->GetDouble());
   return 1;
 }
 
@@ -130,23 +131,28 @@ int l_getString(lua_State *L) {
   return 1;
 }
 
-static const luaL_Reg bufferFunc[] = {{"new", NewBuffer},
-                                      {"PutByte", l_putByte},
-                                      {"PutShort", l_putShort},
-                                      {"PutInt", l_putInt},
-                                      {"PutFloat", l_putFloat},
-                                      {"PutLong", l_putLong},
-                                      {"PutDouble", l_putDouble},
-                                      {"PutString", l_putString},
-                                      {"GetByte", l_getByte},
-                                      {"GetShort", l_getShort},
-                                      {"GetInt", l_getInt},
-                                      {"GetFloat", l_getFloat},
-                                      {"GetLong", l_getLong},
-                                      {"GetDouble", l_getDouble},
-                                      {"GetString", l_getString},
-                                      {"ToString", l_ToString},
-                                      {NULL, NULL}};
+int l_seek(lua_State *L) {
+  Buffer *buf = GetBuffer(L, 1);
+  int numberOfArgs = lua_gettop(L);
+  if (numberOfArgs > 1) {
+    int n = luaL_checkinteger(L, 2);
+    buf->seek(n);
+  } else {
+    buf->seek(0);
+  }
+  return 0;
+}
+
+static const luaL_Reg bufferFunc[] = {
+    {"new", NewBuffer},         {"PutByte", l_putByte},
+    {"PutShort", l_putShort},   {"PutInt", l_putInt},
+    {"PutFloat", l_putFloat},   {"PutLong", l_putLong},
+    {"PutDouble", l_putDouble}, {"PutString", l_putString},
+    {"GetByte", l_getByte},     {"GetShort", l_getShort},
+    {"GetInt", l_getInt},       {"GetFloat", l_getFloat},
+    {"GetLong", l_getLong},     {"GetDouble", l_getDouble},
+    {"GetString", l_getString}, {"ToString", l_ToString},
+    {"Seek", l_seek},           {NULL, NULL}};
 
 extern "C" int luaopen_buffer(lua_State *L) {
   luaL_newmetatable(L, "Buffer");
