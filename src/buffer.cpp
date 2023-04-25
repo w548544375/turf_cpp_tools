@@ -4,7 +4,6 @@
 #include <memory>
 #include <pthread.h>
 #include <string>
-
 #define DEFAULT_SIZE 256
 
 #define DEFAULT_GROW 2
