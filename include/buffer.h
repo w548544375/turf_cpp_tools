@@ -2,6 +2,7 @@
 #define __BUFFER_H__
 #include <iostream>
 #include <memory>
+#include <string>
 
 class Buffer {
 public:
@@ -18,6 +19,7 @@ public:
   void PutString(const char *, int);
   void PutString(std::string &);
   void PutString(const char *);
+  void Put(Buffer *buf);
 
   char GetByte();
   short GetShort();
@@ -33,7 +35,7 @@ public:
   int Pos() { return pos; }
   int Cap() { return capicity; }
   unsigned char *Buf() const { return this->buff; }
-
+  void reset();
   const char *String();
 
 private:

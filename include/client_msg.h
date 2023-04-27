@@ -24,6 +24,8 @@ public:
   ClientMsg(enum ClientMsgType msgType);
   virtual ~ClientMsg();
 
+  virtual AppData *Serialize();
+
 protected:
   enum ClientMsgType msgType;
 
@@ -40,6 +42,8 @@ public:
   AppData *GetAppData() { return appData; };
 
   ~ClientTold();
+
+  AppData *Serialize();
 };
 
 class ClientBoundTheAvatar : public ClientMsg {
@@ -52,6 +56,8 @@ public:
   ~ClientBoundTheAvatar();
   unsigned long GetID() { return id; };
   AppData *GetAppData() { return appData; };
+
+  AppData *Serialize();
 };
 
 class ClientUnboundTheAvatar : public ClientMsg {
@@ -61,6 +67,8 @@ private:
 public:
   ClientUnboundTheAvatar(unsigned long);
   unsigned long GetID() { return id; };
+
+  AppData *Serialize();
 };
 
 class ClientNearOccupantMovedIn : ClientMsg {
@@ -80,6 +88,8 @@ public:
   unsigned long GetID() { return id; }
   unsigned short GetMap() { return map; }
   Pos GetPosition() { return position; }
+
+  AppData *Serialize();
 };
 
 class ClientNearOccupantMovedOut : ClientMsg {
@@ -89,6 +99,8 @@ private:
 public:
   ClientNearOccupantMovedOut(unsigned long);
   unsigned long GetID() { return id; }
+
+  AppData *Serialize();
 };
 
 class ClientDisconnected : ClientMsg {
@@ -98,6 +110,8 @@ private:
 public:
   ClientDisconnected(int);
   int GetState() { return state; }
+
+  AppData *Serialize();
 };
 
 class TheAvatarActivated : ClientMsg {
@@ -113,6 +127,8 @@ public:
   unsigned long GetID() { return id; }
   unsigned short GetMap() { return map; }
   Pos GetPosition() { return position; }
+
+  AppData *Serialize();
 };
 
 class TheAvatarDeactivated : ClientMsg {
@@ -122,6 +138,8 @@ private:
 public:
   TheAvatarDeactivated(unsigned long);
   unsigned long GetID() { return id; }
+
+  AppData *Serialize();
 };
 
 class TheAvatarMoved : ClientMsg {
@@ -142,6 +160,8 @@ public:
   Pos GetPosition() { return position; };
   long GetServerTime() { return serverTime; };
   bool IsConfirm() { return isConfirm; };
+
+  AppData *Serialize();
 };
 
 class TheAvatarMovedToOtherMap : ClientMsg {
@@ -161,6 +181,8 @@ public:
   unsigned short GetMap() { return map; }
   Pos GetPosition() { return position; }
   AppData *GetAppData() { return appData; }
+
+  AppData *Serialize();
 };
 
 class NearOccupantTold : ClientMsg {
@@ -173,6 +195,8 @@ public:
   ~NearOccupantTold();
   AppData *GetAppData();
   unsigned long GetID();
+
+  AppData *Serialize();
 };
 
 class NearOccupantMoved : ClientMsg {
@@ -189,6 +213,8 @@ public:
   float GetDirection() { return direction; }
   unsigned long GetID() { return id; }
   Pos GetPosition() { return pos; }
+
+  AppData *Serialize();
 };
 
 class ClientToldAt : ClientMsg {
@@ -201,6 +227,8 @@ public:
   ~ClientToldAt();
   AppData *GetAppData() { return appData; }
   Pos GetPosition() { return position; }
+
+  AppData *Serialize();
 };
 
 #endif // !__CLIENT_MSG_H__

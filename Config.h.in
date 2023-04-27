@@ -1,2 +1,25 @@
-#define Sephiroth_VERSION_MAJOR @SephirothServer_VERSION_MAJOR@
-#define Sephiroth_VERSION_MINOR @SephirothServer_VERSION_MINOR@
+
+#define CLIENT_TOLD 0x140A
+//  ClientBoundTheAvatar,
+#define CLIENT_BOUND_THE_AVATAR 0x1404
+/* ClientUnboundTheAvatar, */
+#define CLIENT_UNBOUND_THE_AVATAR 0x1405
+/* ClientNearOccupantMovedIn, */
+#define CLIENT_NEAR_OCCUPANT_MOVED_IN 0x1411
+/* ClientNearOccupantMovedOut, */
+#define CLIENT_NEAR_OCCUPANT_MOVED_OUT 0x1410
+/* ClientDisconnected, */
+#define CLIENT_DISCONNECTED 0x1550
+/* TheAvatarActivated, */
+#define THE_AVATAR_AVTIVATED 0x1407
+/* TheAvatarDeactivated, */
+#define THE_AVATAR_DEACTIVATED 0x1408
+/* TheAvatarMoved, */
+#define THE_AVATAR_MOVED 0x140D
+/* TheAvatarMovedToOtherMap, */
+#define THE_AVATAR_MOVED_TO_OTHER_MAP 0x00
+/* NearOccupantTold = 0xA, */
+#define NEAR_OCCUPANT_TOLD 0x140B
+/* NearOccupantMoved = 0xB, */
+#define NEAR_OCCUPANT_MOVED 0x140D
+/* ClientToldAt = 0xD */

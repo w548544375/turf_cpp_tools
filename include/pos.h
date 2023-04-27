@@ -2,7 +2,7 @@
 #define __POS_H__
 
 class Pos {
-private:
+public:
   long x;
   long y;
 

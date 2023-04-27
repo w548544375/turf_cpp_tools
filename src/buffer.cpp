@@ -126,6 +126,14 @@ void Buffer::PutString(const char *v) {
   this->PutString(v, len);
 }
 
+void Buffer::Put(Buffer *buf) {
+  this->tryGrow(buf->size);
+  buf->seek(0);
+  memcpy(this->buff + this->pos, buf->buff, buf->size);
+  this->size += buf->size;
+  this->pos += buf->size;
+}
+
 char Buffer::GetByte() {
   char b = this->buff[this->pos];
   this->pos += 1;
@@ -191,4 +199,9 @@ const char *Buffer::String() {
     strcat(da, temp);
   }
   return da;
+}
+
+void Buffer::reset() {
+  this->pos = 0;
+  this->size = 0;
 }

@@ -69,6 +69,8 @@ set_target_properties(buffer PROPERTIES POSITION_INDEPENDENT_CODE True)
 target_include_directories(buffer PUBLIC "${PROJECT_BINARY_DIR}"
                                          "${PROJECT_SOURCE_DIR}/include")
 
+configure_file(Config.h.in Config.h)
+
 target_include_directories(buffer PUBLIC "${SOURCE_DIR}/src")
 
 target_link_libraries(buffer liblua)
