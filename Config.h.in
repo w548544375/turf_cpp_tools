@@ -15,11 +15,14 @@
 /* TheAvatarDeactivated, */
 #define THE_AVATAR_DEACTIVATED 0x1408
 /* TheAvatarMoved, */
-#define THE_AVATAR_MOVED 0x140D
+#define THE_AVATAR_MOVED 0x140F
 /* TheAvatarMovedToOtherMap, */
 #define THE_AVATAR_MOVED_TO_OTHER_MAP 0x00
 /* NearOccupantTold = 0xA, */
 #define NEAR_OCCUPANT_TOLD 0x140B
 /* NearOccupantMoved = 0xB, */
-#define NEAR_OCCUPANT_MOVED 0x140D
+#define NEAR_OCCUPANT_MOVED 0x140E
 /* ClientToldAt = 0xD */
+#define CLIENT_TOLD_AT 0x1417
+
+// 0x1412 0x1414 0x1415

@@ -60,7 +60,7 @@ set_target_properties(liblua PROPERTIES IMPORTED_LOCATION
 # target_link_libraries(${PROJECT_NAME} liblua)
 
 # #########################################libbuffer###############################
-add_library(buffer SHARED ${SOURCE_FILES} lua_buffer.cpp)
+add_library(buffer SHARED ${SOURCE_FILES})
 
 set_target_properties(buffer PROPERTIES PREFIX "")
 # set_target_properties(buffer PROPERTIES LIBRARY_OUTPUT_NAME babuffer)
