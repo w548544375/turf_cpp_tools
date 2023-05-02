@@ -1,6 +1,6 @@
-#ifndef __CRYPTO_H__
-#define __CRYPTO_H__
-
+#ifndef __CRYPTOR_H__
+#define __CRYPTOR_H__
+#include <string>
 typedef struct RoundInfo
 {
   /* data */
@@ -11,11 +11,11 @@ typedef struct RoundInfo
 
 
 
-class Crypto {
+class Cryptor {
 public:
-  Crypto();
-  Crypto(bool usingCrypt);
-  ~Crypto();
+  Cryptor();
+  Cryptor(bool usingCrypt);
+  ~Cryptor();
 
   void SetRoundBound(int round,unsigned char bound);
   void SetRoundBegin(int round,unsigned char begin);
@@ -25,6 +25,7 @@ public:
   void Encrypt(unsigned char *, int);
   void Decrypt(unsigned char *, int);
 
+  std::string String();
 private:
   bool isCrypt;
   // 第一轮加解密最大值以及当前计数

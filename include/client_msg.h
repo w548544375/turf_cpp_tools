@@ -22,9 +22,9 @@ enum ClientMsgType {
 class ClientMsg {
 public:
   ClientMsg(enum ClientMsgType msgType);
-  virtual ~ClientMsg();
+  virtual ~ClientMsg() {};
 
-  virtual AppData *Serialize();
+  virtual AppData *Serialize() = 0;
 
 protected:
   enum ClientMsgType msgType;
