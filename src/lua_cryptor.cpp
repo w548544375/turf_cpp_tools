@@ -13,7 +13,7 @@ Cryptor *getCrypto(lua_State *L, int arg)
     return *(Cryptor **)crypto;
 }
 
-int lua_NewCrypto(lua_State *L)
+int lua_NewCryptor(lua_State *L)
 {
     int argcNum = lua_gettop(L);
     Cryptor **crypto = (Cryptor **)lua_newuserdata(L, sizeof(Cryptor));

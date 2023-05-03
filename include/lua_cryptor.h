@@ -4,7 +4,7 @@
 #define META_CRYPTO "Crypto"
 class lua_State;
 
-int lua_NewCrypto(lua_State *L);
+int lua_NewCryptor(lua_State *L);
 
 int lua_CryptorFeed(lua_State *L);
 

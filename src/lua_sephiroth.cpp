@@ -8,6 +8,7 @@
 static const luaL_Reg constructors[] = {
     {"AppData", NewAppData},
     {"ClientMsg", NewClientMsg},
+    {"Cryptor",lua_NewCryptor},
     {"RSAInit",lua_init},
     {"RSADecrypt",lua_RSADecrypt},
     {"RSAEncrypt",lua_RSAEncrypt},

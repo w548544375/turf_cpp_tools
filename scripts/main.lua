@@ -29,7 +29,7 @@ print("解密: " .. plain)
 sep.Free()
 
 -- 测试加密组件
-local crypto = sep.Crypto()
+local crypto = sep.Cryptor()
 local seed01 = string.pack("BBBBBBBBBB", 0x30, 0x1F, 0x3D, 0x30, 0x1E, 0x30, 0x27, 0x41, 0x25, 0x1A)
 crypto:Feed(seed01)
 crypto:SetRoundBounds(0, 0xE5)
