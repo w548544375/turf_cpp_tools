@@ -3,15 +3,15 @@
 #include "lua_clientmsg.h"
 #include "lua_common.h"
 #include "lua_rsa.h"
-#include "lua_crypto.h"
+#include "lua_cryptor.h"
 
 static const luaL_Reg constructors[] = {
     {"AppData", NewAppData},
     {"ClientMsg", NewClientMsg},
     {"RSAInit",lua_init},
-    {"RSADecrypt",lua_Decrypt},
-    {"RSAEncrypt",lua_Encrypt},
-    {"Free",lua_Free},
+    {"RSADecrypt",lua_RSADecrypt},
+    {"RSAEncrypt",lua_RSAEncrypt},
+    {"Free",lua_RSAFree},
     {"toHexString",lua_toHexString},
     {nullptr, nullptr}};
 
@@ -40,11 +40,11 @@ static const luaL_Reg clientToldFuns[] = {{"Serialize", ClientMsgSerialize},
                                           {NULL, NULL}};
 
 static const luaL_Reg cryptoFunctions[] = {
-    {"Feed", lua_Feed},
+    {"Feed", lua_CryptorFeed},
     {"SetRoundBounds", lua_SetRoundBounds},
     {"SetRoundBegin", lua_SetRoundBegin},
-    {"Decrypt", lua_Decrypt},
-    {"Encrypt", lua_Encrypt},
+    {"Decrypt", lua_CryptorDecrypt},
+    {"Encrypt", lua_CryptorEncrypt},
     {"__tostring",lua_CryptToString},
     {"__gc",lua_GC},
     {nullptr, nullptr}};

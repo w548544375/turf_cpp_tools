@@ -74,7 +74,7 @@ int lua_init(lua_State *L)
     return 0;
 }
 
-int lua_Decrypt(lua_State *L)
+int lua_RSADecrypt(lua_State *L)
 {
     size_t len;
     const char *msg = luaL_checklstring(L, 1, &len);
@@ -87,7 +87,7 @@ int lua_Decrypt(lua_State *L)
     return 1;
 }
 
-int lua_Encrypt(lua_State *L)
+int lua_RSAEncrypt(lua_State *L)
 {
     size_t len;
     const char *msg = luaL_checklstring(L, 1, &len);
@@ -100,7 +100,7 @@ int lua_Encrypt(lua_State *L)
     return 1;
 }
 
-int lua_Free(lua_State *L)
+int lua_RSAFree(lua_State *L)
 {
     Free();
     return 0;

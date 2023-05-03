@@ -3,7 +3,7 @@
 class lua_State;
 
 int lua_init(lua_State *L);
-int lua_Decrypt(lua_State *L);
-int lua_Encrypt(lua_State *L);
-int lua_Free(lua_State * L);
+int lua_RSADecrypt(lua_State *L);
+int lua_RSAEncrypt(lua_State *L);
+int lua_RSAFree(lua_State * L);
 #endif

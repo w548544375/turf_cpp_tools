@@ -1,5 +1,5 @@
 #include <cstring>
-#include "lua_crypto.h"
+#include "lua_cryptor.h"
 #include "lua.hpp"
 #include "cryptor.h"
 #include <string>
@@ -30,7 +30,7 @@ int lua_NewCrypto(lua_State *L)
     return 1;
 }
 
-int lua_Feed(lua_State *L)
+int lua_CryptorFeed(lua_State *L)
 {
     Cryptor *crypto = getCrypto(L, 1);
     size_t len;
@@ -59,7 +59,7 @@ int lua_SetRoundBegin(lua_State *L)
     return 0;
 }
 
-int lua_Encrypt(lua_State *L)
+int lua_CryptorEncrypt(lua_State *L)
 {
     Cryptor *crypto = getCrypto(L, 1);
     size_t len;
@@ -72,7 +72,7 @@ int lua_Encrypt(lua_State *L)
     return 1;
 }
 
-int lua_Decrypt(lua_State *L)
+int lua_CryptorDecrypt(lua_State *L)
 {
     Cryptor *crypto = getCrypto(L, 1);
     size_t len;
