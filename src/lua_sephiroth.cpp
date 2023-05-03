@@ -3,10 +3,11 @@
 #include "lua_clientmsg.h"
 #include "lua_common.h"
 #include "lua_rsa.h"
+#include "lua_crypto.h"
 
 static const luaL_Reg constructors[] = {
-    {"NewAppData", NewAppData},
-    {"NewClientMsg", NewClientMsg},
+    {"AppData", NewAppData},
+    {"ClientMsg", NewClientMsg},
     {"RSAInit",lua_init},
     {"RSADecrypt",lua_Decrypt},
     {"RSAEncrypt",lua_Encrypt},
@@ -38,10 +39,21 @@ static const luaL_Reg clientToldFuns[] = {{"Serialize", ClientMsgSerialize},
                                           {"GetType", GetMsgType},
                                           {NULL, NULL}};
 
+static const luaL_Reg cryptoFunctions[] = {
+    {"Feed", lua_Feed},
+    {"SetRoundBounds", lua_SetRoundBounds},
+    {"SetRoundBegin", lua_SetRoundBegin},
+    {"Decrypt", lua_Decrypt},
+    {"Encrypt", lua_Encrypt},
+    {"__tostring",lua_CryptToString},
+    {"__gc",lua_GC},
+    {nullptr, nullptr}};
+
 extern "C" int luaopen_sephiroth(lua_State *L)
 {
   registerUserMetaTable(L, "AppData", AppDataFunc);
   registerUserMetaTable(L, "ClientMsg", clientToldFuns);
+  registerUserMetaTable(L, META_CRYPTO, cryptoFunctions);
   /* luaL_newlib(L, bufferLib); */
   luaL_newlib(L, constructors);
   return 1;
