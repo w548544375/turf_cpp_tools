@@ -8,8 +8,11 @@
 
 #define DEFAULT_GROW 2
 
+#define INC_SIZE(x) if(x >= size) {size = x;}
+
 Buffer::Buffer() : pos(0), size(0), capicity(DEFAULT_SIZE) {
   buff = new unsigned char[DEFAULT_SIZE];
+  memset(buff,0,capicity);
 }
 
 Buffer::Buffer(uint l) : pos(0), size(0), capicity(l) {
@@ -40,26 +43,27 @@ void Buffer::tryGrow(int required) {
 }
 
 void Buffer::seek(int po) {
-  if (po >= size) {
-    pos = size;
+  if (po >= capicity) {
+    this->pos = capicity;
   } else {
-    pos = po;
+    this->pos = po;
   }
+  INC_SIZE(pos);
 }
 
 void Buffer::PutByte(char b) {
   this->tryGrow(1);
   this->buff[pos] = b & 0xFF;
-  this->size += 1;
   this->pos += 1;
+  INC_SIZE(pos);
 }
 
 void Buffer::PutShort(short v) {
   this->tryGrow(2);
   this->buff[pos] = (unsigned char)(v >> 0 & 0xffff);
   this->buff[pos + 1] = (unsigned char)(v >> 8 & 0xffff);
-  this->size += 2;
   this->pos += 2;
+  INC_SIZE(pos);
 }
 
 void Buffer::PutInt(int v) {
@@ -68,8 +72,8 @@ void Buffer::PutInt(int v) {
   this->buff[pos + 1] = v >> 8 & 0xFFFFFFFF;
   this->buff[pos + 2] = v >> 16 & 0xFFFFFFFF;
   this->buff[pos + 3] = v >> 24 & 0xFFFFFFFF;
-  this->size += 4;
   this->pos += 4;
+  INC_SIZE(pos);
 }
 
 void Buffer::PutLong(long v) {
@@ -82,8 +86,8 @@ void Buffer::PutLong(long v) {
   this->buff[pos + 5] = v >> 40 & 0xFFFFFFFFFFFFFFFF;
   this->buff[pos + 6] = v >> 48 & 0xFFFFFFFFFFFFFFFF;
   this->buff[pos + 7] = v >> 56 & 0xFFFFFFFFFFFFFFFF;
-  this->size += 8;
   this->pos += 8;
+  INC_SIZE(pos);
 }
 
 void Buffer::PutFloat(float v) {
@@ -92,9 +96,8 @@ void Buffer::PutFloat(float v) {
   for (int i = 0; i < 4; i++) {
     this->buff[pos + i] = *(pdata + i);
   }
-
-  this->size += 4;
   this->pos += 4;
+  INC_SIZE(pos);
 }
 
 void Buffer::PutDouble(double v) {
@@ -103,8 +106,8 @@ void Buffer::PutDouble(double v) {
   for (int i = 0; i < 8; i++) {
     this->buff[pos + i] = *pdata++;
   }
-  this->size += 8;
   this->pos += 8;
+  INC_SIZE(pos);
 }
 
 void Buffer::PutString(const char *v, int len) {
@@ -112,8 +115,8 @@ void Buffer::PutString(const char *v, int len) {
   this->tryGrow(length + 4);
   this->PutInt(length);
   memcpy(this->buff + this->pos, v, length);
-  this->size += length;
   this->pos += length;
+  INC_SIZE(pos);
 }
 
 void Buffer::PutString(std::string &v) {
@@ -130,8 +133,8 @@ void Buffer::Put(Buffer *buf) {
   this->tryGrow(buf->size);
   buf->seek(0);
   memcpy(this->buff + this->pos, buf->buff, buf->size);
-  this->size += buf->size;
   this->pos += buf->size;
+  INC_SIZE(pos);
 }
 
 char Buffer::GetByte() {
@@ -190,15 +193,14 @@ void Buffer::GetString(std::string &str) {
   this->pos += len;
 }
 
-const char *Buffer::String() {
+void Buffer::String(std::string & str) {
   char *da = new char[size * 4];
   char temp[4];
   for (int i = 0; i < size; i++) {
     memset(temp, 0, 4);
     sprintf(temp, "%02X ", this->buff[i]);
-    strcat(da, temp);
+    str.append(temp);
   }
-  return da;
 }
 
 void Buffer::reset() {

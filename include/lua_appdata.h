@@ -1,3 +1,6 @@
+#ifndef __LUA_APPDATA_H__
+#define __LUA_APPDATA_H__
+
 class lua_State;
 
 int NewAppData(lua_State *L);
@@ -35,3 +38,5 @@ int l_getDouble(lua_State *L);
 int l_getString(lua_State *L);
 
 int l_seek(lua_State *L);
+
+#endif // !DEBUG

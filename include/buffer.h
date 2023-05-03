@@ -36,7 +36,7 @@ public:
   int Cap() { return capicity; }
   unsigned char *Buf() const { return this->buff; }
   void reset();
-  const char *String();
+  void String(std::string &);
 
 private:
   int pos;

@@ -59,22 +59,22 @@ set_target_properties(liblua PROPERTIES IMPORTED_LOCATION
 #
 # target_link_libraries(${PROJECT_NAME} liblua)
 
-# #########################################libbuffer###############################
-add_library(buffer SHARED ${SOURCE_FILES})
+# #########################################libsephiroth###############################
+find_package(OpenSSL REQUIRED)
+add_library(sephiroth SHARED ${SOURCE_FILES})
 
-set_target_properties(buffer PROPERTIES PREFIX "")
-# set_target_properties(buffer PROPERTIES LIBRARY_OUTPUT_NAME babuffer)
-set_target_properties(buffer PROPERTIES POSITION_INDEPENDENT_CODE True)
+set_target_properties(sephiroth PROPERTIES PREFIX "")
+# set_target_properties(sephiroth PROPERTIES LIBRARY_OUTPUT_NAME basephiroth)
+set_target_properties(sephiroth PROPERTIES POSITION_INDEPENDENT_CODE True)
 
-target_include_directories(buffer PUBLIC "${PROJECT_BINARY_DIR}"
-                                         "${PROJECT_SOURCE_DIR}/include")
+target_include_directories(sephiroth PUBLIC "${PROJECT_BINARY_DIR}"
+                                            "${PROJECT_SOURCE_DIR}/include")
+target_include_directories(sephiroth PRIVATE ${OPENSSL_INCLUDE_DIR})
+target_include_directories(sephiroth PUBLIC "${SOURCE_DIR}/src")
 
 configure_file(Config.h.in Config.h)
 
-target_include_directories(buffer PUBLIC "${SOURCE_DIR}/src")
-
-target_link_libraries(buffer liblua)
-
+target_link_libraries(sephiroth PRIVATE liblua OpenSSL::Crypto)
 set(COPY_TARGET ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME})
 set(SKYNET_CSERVICE ${COPY_TARGET}/cservice)
 set(SKYNET_SERVICE ${COPY_TARGET}/service)

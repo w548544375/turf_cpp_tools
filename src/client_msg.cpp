@@ -152,6 +152,10 @@ TheAvatarMoved::TheAvatarMoved(short seq, Pos const &pos, float direction,
     : ClientMsg(ClientMsgType::EAvatarMoved), sequence(seq), position(pos),
       direction(direction), serverTime(serverTime) {}
 
+TheAvatarMoved::~TheAvatarMoved()
+{
+}
+
 AppData *TheAvatarMoved::Serialize() {
   AppData *result = new AppData();
   result->PutShort(THE_AVATAR_MOVED);
@@ -177,6 +181,8 @@ TheAvatarMovedToOtherMap::TheAvatarMovedToOtherMap(unsigned long id,
       position(pos), direction(direction), appData(data) {}
 
 TheAvatarMovedToOtherMap::~TheAvatarMovedToOtherMap() { delete appData; }
+
+AppData *TheAvatarMovedToOtherMap::Serialize() { return nullptr; }
 
 NearOccupantTold::NearOccupantTold(unsigned long id, AppData *data)
     : ClientMsg(ClientMsgType::ENearOccupantTold), id(id), appData(data) {}

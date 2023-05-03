@@ -26,3 +26,7 @@
 #define CLIENT_TOLD_AT 0x1417
 
 // 0x1412 0x1414 0x1415
+
+
+// 0x140C  moveRequest  客户端发送给服务端的移动信息
+// 0x1409  Client::Tell

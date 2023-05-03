@@ -75,9 +75,9 @@ int l_putString(lua_State *L) {
 
 int l_ToString(lua_State *L) {
   AppData *buf = GetAppData(L, 1);
-  const char *s = buf->String();
-  lua_pushstring(L, s);
-  delete[] s;
+  std::string str;
+  buf->String(str);
+  lua_pushstring(L, str.c_str());
   return 1;
 }
 
