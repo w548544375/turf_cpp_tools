@@ -41,11 +41,11 @@ crypto:SetRoundBegin(1, 0x01)
 print(crypto)
 local data = string.pack("BBBBBBBBBBBBBBBBBB", 0x01, 0x14, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00, 0x01, 0x14)
---print("origin data:\n" .. sep.ToHexString(data))
+print("origin data:\n" .. sep.toHexString(data))
 local encrypted = crypto:Encrypt(data)
---print("crypted data:\n" .. sep.ToHexString(encrypted))
+print("crypted data:\n" .. sep.toHexString(encrypted))
 local decrypted = crypto:Decrypt(encrypted)
-print("decrypted data:\n" .. sep.ToHexString(decrypted))
+print("decrypted data:\n" .. sep.toHexString(decrypted))
 
 skynet.start(function()
 
