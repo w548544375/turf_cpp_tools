@@ -3,6 +3,7 @@
 #include "openssl/rsa.h"
 #include <iostream>
 #include "lua.hpp"
+#include "rsa3.h"
 
 RSA *privKey = nullptr;
 
@@ -74,6 +75,7 @@ int lua_init(lua_State *L)
     return 0;
 }
 
+
 int lua_RSADecrypt(lua_State *L)
 {
     size_t len;
@@ -103,5 +105,41 @@ int lua_RSAEncrypt(lua_State *L)
 int lua_RSAFree(lua_State *L)
 {
     Free();
+    return 0;
+}
+
+
+
+int lua_RSA3Init(lua_State * L) {
+    const char *pubPath = luaL_checkstring(L, 1);
+    const char *privPath = luaL_checkstring(L, 1);
+    RSAInit(pubPath,privPath);
+    return 0;
+}
+
+int lua_RSA3Encrypt(lua_State * L) {
+    size_t len;
+    const unsigned char *msg = (const unsigned char *)luaL_checklstring(L, 1, &len);
+    unsigned char buf[128];
+    size_t outLen;
+    int res = RSAEncrypt(msg,len,buf,outLen);
+    std::cout << "Encrypted Length:" << res << std::endl;
+    lua_pushlstring(L,(char *)buf,outLen);
+    return 1;
+}
+
+int lua_RSA3Decrypt(lua_State * L) {
+    size_t len;
+    const unsigned char *msg = (const unsigned char *)luaL_checklstring(L, 1, &len);
+    unsigned char buf[len];
+    size_t outLen;
+    int res = RSADecrypt(msg,len,buf,outLen);
+    lua_pushlstring(L,(char *)buf,outLen);
+    std::cout << "Encrypted Length:" << res << "OutLen: " << outLen << std::endl;
+    return 1;
+}
+
+int lua_RSA3Free(lua_State * L) {
+    RSAFree();
     return 0;
 }

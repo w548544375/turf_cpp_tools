@@ -21,12 +21,21 @@ print("GetString" .. b:GetString())
 local msg = sep.ClientMsg(0, b)
 local ad = msg:Serialize()
 print(ad)
+
+--- 测试RSA
 sep.RSAInit("./config/private_key.pem")
 local cipher = sep.RSAEncrypt("bigz11")
 print("加密后的字符串:" .. sep.toHexString(cipher))
 local plain = sep.RSADecrypt(cipher)
 print("解密: " .. plain)
 sep.Free()
+
+sep.RSA3Init("./config/pub_key.pem","./config/private_key.pem")
+local cipher = sep.RSA3Encrypt("bigz11")
+print("加密后的字符串:" .. sep.toHexString(cipher))
+local plain = sep.RSA3Decrypt(cipher)
+print("解密: " .. plain)
+sep.RSA3Free()
 
 -- 测试加密组件
 local crypto = sep.Cryptor()
