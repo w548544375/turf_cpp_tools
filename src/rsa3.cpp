@@ -1,5 +1,6 @@
 #include "rsa3.h"
 #include "openssl/rsa.h"
+#include "openssl/evp.h"
 #include "openssl/pem.h"
 #include <iostream>
 
@@ -15,27 +16,50 @@ RSA_INFO ri;
 
 void RSAInit(const char *pub, const char *pri)
 {
-    FILE *fp = fopen(pub, "r");
-    if (fp == nullptr)
+    BIO *in = NULL;
+    in = BIO_new(BIO_s_file());
+    BIO_read_filename(in, pub);
+    if (in == nullptr)
     {
         std::cout << "public key path invalid!" << std::endl;
         return;
     }
-    ri.pub = PEM_read_PUBKEY(fp, NULL, NULL, NULL);
-    fclose(fp);
-    ri.pubCtx = EVP_PKEY_CTX_new(ri.pub, NULL);
-    EVP_PKEY_encrypt_init(ri.pubCtx);
-
-    FILE *fpriv = fopen(pri, "r");
-    if (fpriv == nullptr)
+    ri.pub = PEM_read_bio_PUBKEY(in, NULL, NULL, NULL);
+    BIO_free(in);
+    if (ri.pub == NULL)
     {
-        std::cout << "private key path invalid!" << std::endl;
+        std::cout << "error : read public keys" << std::endl;
         return;
     }
-    ri.pri = PEM_read_PrivateKey(fpriv, NULL, NULL, NULL);
-    fclose(fpriv);
+    ri.pubCtx = EVP_PKEY_CTX_new(ri.pub, NULL);
+    EVP_PKEY_encrypt_init(ri.pubCtx);
+    if (EVP_PKEY_CTX_set_rsa_padding(ri.pubCtx, RSA_PKCS1_PADDING) <= 0)
+    {
+        std::cout << "error :public set_rsa_padding" << std::endl;
+        return;
+    }
+    BIO *priIn = NULL;
+    priIn = BIO_new(BIO_s_file());
+    BIO_read_filename(priIn, pri);
+    if (priIn == nullptr)
+    {
+        std::cout << "private key path invalid! " << std::endl;
+        return;
+    }
+    ri.pri = PEM_read_bio_PrivateKey(priIn, NULL, NULL, NULL);
+    BIO_free(priIn);
+    if (ri.pri == NULL)
+    {
+        std::cout << "error : read private keys =" << pri << std::endl;
+        return;
+    }
     ri.priCtx = EVP_PKEY_CTX_new(ri.pri, NULL);
     EVP_PKEY_decrypt_init(ri.priCtx);
+    if (EVP_PKEY_CTX_set_rsa_padding(ri.priCtx, RSA_PKCS1_PADDING) <= 0)
+    {
+        std::cout << "error :private set_rsa_padding" << std::endl;
+        return;
+    }
 }
 
 void RSAFree()
@@ -50,12 +74,26 @@ void RSAFree()
         EVP_PKEY_CTX_free(ri.priCtx);
 }
 
-int RSAEncrypt(const unsigned char * plain,int len,unsigned char * out,size_t outLen)
+unsigned char * RSAEncrypt(const unsigned char *plain, int len, size_t &outLen)
 {
-   return EVP_PKEY_encrypt(ri.pubCtx,out,&outLen,plain,len);
+    if (EVP_PKEY_encrypt(ri.pubCtx, NULL, &outLen, plain, len) <= 0)
+    {
+        std::cout << "error detemine buffer length " << std::endl;
+        return 0;
+    }
+    unsigned char * out = (unsigned char *)OPENSSL_malloc(outLen);
+    int res = EVP_PKEY_encrypt(ri.pubCtx, out, &outLen, plain, len);
+    return out;
 }
 
-int RSADecrypt(const unsigned char *cipher, int len, unsigned char *out, size_t outLen)
+unsigned char * RSADecrypt(const unsigned char *cipher, int len, size_t &outLen)
 {
-    return EVP_PKEY_decrypt(ri.priCtx,out,&outLen,cipher,len);
+    if (EVP_PKEY_decrypt(ri.priCtx, NULL, &outLen, cipher, len) <= 0)
+    {
+        std::cout << "[Decrypt]error detemine buffer length " << std::endl;
+        return 0;
+    }
+    unsigned char * out = (unsigned char *)OPENSSL_malloc(outLen);
+    int res = EVP_PKEY_decrypt(ri.priCtx, out, &outLen, cipher, len);
+    return out;
 }

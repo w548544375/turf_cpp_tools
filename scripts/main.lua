@@ -28,15 +28,16 @@ local cipher = sep.RSAEncrypt("bigz11")
 print("加密后的字符串:" .. sep.toHexString(cipher))
 local plain = sep.RSADecrypt(cipher)
 print("解密: " .. plain)
-sep.Free()
-
+-- 使用openssl 3.0 编写的RSA算法
 sep.RSA3Init("./config/pub_key.pem","./config/private_key.pem")
 local cipher = sep.RSA3Encrypt("bigz11")
 print("加密后的字符串:" .. sep.toHexString(cipher))
+local originDecrypt = sep.RSADecrypt(cipher)
+print("使用RSA解密:" .. originDecrypt)
 local plain = sep.RSA3Decrypt(cipher)
 print("解密: " .. plain)
 sep.RSA3Free()
-
+sep.Free()
 -- 测试加密组件
 local crypto = sep.Cryptor()
 local seed01 = string.pack("BBBBBBBBBB", 0x30, 0x1F, 0x3D, 0x30, 0x1E, 0x30, 0x27, 0x41, 0x25, 0x1A)

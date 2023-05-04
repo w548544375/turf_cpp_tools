@@ -29,11 +29,11 @@ add_library(liblua STATIC IMPORTED)
 
 ExternalProject_Get_Property(lua SOURCE_DIR)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-# set(CMAKE_VERBOSE_MAKEFILE ON)
-set(OPENSSL_USE_STATIC_LIBS TRUE)
+set(CMAKE_VERBOSE_MAKEFILE ON)
+
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${PROJECT_NAME}/seplibs)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${PROJECT_NAME}/seplibs)
@@ -61,7 +61,11 @@ set_target_properties(liblua PROPERTIES IMPORTED_LOCATION
 # target_link_libraries(${PROJECT_NAME} liblua)
 
 # #########################################libsephiroth###############################
+set(OPENSSL_USE_STATIC_LIBS ON)
+
 find_package(OpenSSL REQUIRED)
+
+message(${OPENSSL_LIBRARIES})
 
 add_library(sephiroth SHARED ${SOURCE_FILES})
 
@@ -76,7 +80,7 @@ target_include_directories(sephiroth PUBLIC "${SOURCE_DIR}/src")
 
 configure_file(Config.h.in Config.h)
 
-target_link_libraries(sephiroth PRIVATE liblua OpenSSL::Crypto OpenSSL::SSL)
+target_link_libraries(sephiroth PRIVATE liblua OpenSSL::Crypto)
 set(COPY_TARGET ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME})
 set(SKYNET_CSERVICE ${COPY_TARGET}/cservice)
 set(SKYNET_SERVICE ${COPY_TARGET}/service)

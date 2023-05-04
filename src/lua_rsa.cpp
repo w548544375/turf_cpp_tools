@@ -37,7 +37,7 @@ void Free()
         RSA_free(privKey);
 }
 
-int Decrypt(RSA *privKey, const char *cipher, size_t len,char * dest,int * destLen)
+int Decrypt(RSA *privKey, const char *cipher, size_t len, char *dest, int *destLen)
 {
     int ret = RSA_private_decrypt(len, (unsigned char *)cipher, (unsigned char *)dest, privKey, RSA_PKCS1_PADDING);
     if (ret == -1)
@@ -45,7 +45,7 @@ int Decrypt(RSA *privKey, const char *cipher, size_t len,char * dest,int * destL
         std::cout << "RSA_private_decrypt failed " << std::endl;
         return -1;
     }
-    if(nullptr != destLen)
+    if (nullptr != destLen)
     {
         *destLen = ret;
     }
@@ -75,17 +75,16 @@ int lua_init(lua_State *L)
     return 0;
 }
 
-
 int lua_RSADecrypt(lua_State *L)
 {
     size_t len;
     const char *msg = luaL_checklstring(L, 1, &len);
     int size = RSA_size(privKey);
     char buf[size];
-    memset(buf,0,size);
+    memset(buf, 0, size);
     int decryptedSize;
-    Decrypt(privKey, msg, len,buf,&decryptedSize);
-    lua_pushlstring(L, buf,decryptedSize);
+    Decrypt(privKey, msg, len, buf, &decryptedSize);
+    lua_pushlstring(L, buf, decryptedSize);
     return 1;
 }
 
@@ -95,10 +94,10 @@ int lua_RSAEncrypt(lua_State *L)
     const char *msg = luaL_checklstring(L, 1, &len);
     int size = RSA_size(privKey);
     char buf[size];
-    memset(buf,0,size);
+    memset(buf, 0, size);
     int encryptedSize;
-    Encrypt(privKey, msg, len,buf,&encryptedSize);
-    lua_pushlstring(L, buf,encryptedSize);
+    Encrypt(privKey, msg, len, buf, &encryptedSize);
+    lua_pushlstring(L, buf, encryptedSize);
     return 1;
 }
 
@@ -108,38 +107,40 @@ int lua_RSAFree(lua_State *L)
     return 0;
 }
 
-
-
-int lua_RSA3Init(lua_State * L) {
+int lua_RSA3Init(lua_State *L)
+{
     const char *pubPath = luaL_checkstring(L, 1);
-    const char *privPath = luaL_checkstring(L, 1);
-    RSAInit(pubPath,privPath);
+    const char *privPath = luaL_checkstring(L, 2);
+    RSAInit(pubPath, privPath);
     return 0;
 }
 
-int lua_RSA3Encrypt(lua_State * L) {
+int lua_RSA3Encrypt(lua_State *L)
+{
     size_t len;
     const unsigned char *msg = (const unsigned char *)luaL_checklstring(L, 1, &len);
-    unsigned char buf[128];
     size_t outLen;
-    int res = RSAEncrypt(msg,len,buf,outLen);
-    std::cout << "Encrypted Length:" << res << std::endl;
-    lua_pushlstring(L,(char *)buf,outLen);
+    unsigned char *buf = RSAEncrypt(msg, len, outLen);
+    std::cout << "after encrypt is " << outLen << std::endl;
+    lua_pushlstring(L, (char *)buf, outLen);
+    OPENSSL_free(buf);
     return 1;
 }
 
-int lua_RSA3Decrypt(lua_State * L) {
+int lua_RSA3Decrypt(lua_State *L)
+{
     size_t len;
     const unsigned char *msg = (const unsigned char *)luaL_checklstring(L, 1, &len);
-    unsigned char buf[len];
     size_t outLen;
-    int res = RSADecrypt(msg,len,buf,outLen);
-    lua_pushlstring(L,(char *)buf,outLen);
-    std::cout << "Encrypted Length:" << res << "OutLen: " << outLen << std::endl;
+    unsigned char *buf = RSADecrypt(msg, len, outLen);
+    std::cout << "after decrypt is " << outLen << std::endl;
+    lua_pushlstring(L, (char *)buf, outLen);
+    OPENSSL_free(buf);
     return 1;
 }
 
-int lua_RSA3Free(lua_State * L) {
+int lua_RSA3Free(lua_State *L)
+{
     RSAFree();
     return 0;
 }
