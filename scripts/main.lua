@@ -23,20 +23,11 @@ local ad = msg:Serialize()
 print(ad)
 
 --- 测试RSA
-sep.RSAInit("./config/private_key.pem")
+sep.RSAInit("./config/pub_key.pem","./config/private_key.pem")
 local cipher = sep.RSAEncrypt("bigz11")
 print("加密后的字符串:" .. sep.toHexString(cipher))
 local plain = sep.RSADecrypt(cipher)
 print("解密: " .. plain)
--- 使用openssl 3.0 编写的RSA算法
-sep.RSA3Init("./config/pub_key.pem","./config/private_key.pem")
-local cipher = sep.RSA3Encrypt("bigz11")
-print("加密后的字符串:" .. sep.toHexString(cipher))
-local originDecrypt = sep.RSADecrypt(cipher)
-print("使用RSA解密:" .. originDecrypt)
-local plain = sep.RSA3Decrypt(cipher)
-print("解密: " .. plain)
-sep.RSA3Free()
 sep.Free()
 -- 测试加密组件
 local crypto = sep.Cryptor()

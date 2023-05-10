@@ -1,20 +1,8 @@
 #include "rsa3.h"
-#include "openssl/rsa.h"
-#include "openssl/evp.h"
-#include "openssl/pem.h"
+
 #include <iostream>
 
-typedef struct RSAInfo
-{
-    EVP_PKEY *pub;
-    EVP_PKEY *pri;
-    EVP_PKEY_CTX *pubCtx;
-    EVP_PKEY_CTX *priCtx;
-} RSA_INFO, *PRSA_INFO;
-
-RSA_INFO ri;
-
-void RSAInit(const char *pub, const char *pri)
+void RSAInit(RSAInfo & ri,const char *pub, const char *pri)
 {
     BIO *in = NULL;
     in = BIO_new(BIO_s_file());
@@ -62,7 +50,7 @@ void RSAInit(const char *pub, const char *pri)
     }
 }
 
-void RSAFree()
+void RSAFree(RSAInfo & ri)
 {
     if (ri.pub != nullptr)
         EVP_PKEY_free(ri.pub);
@@ -74,7 +62,7 @@ void RSAFree()
         EVP_PKEY_CTX_free(ri.priCtx);
 }
 
-unsigned char * RSAEncrypt(const unsigned char *plain, int len, size_t &outLen)
+unsigned char * RSAEncrypt(RSAInfo & ri,const unsigned char *plain, int len, size_t &outLen)
 {
     if (EVP_PKEY_encrypt(ri.pubCtx, NULL, &outLen, plain, len) <= 0)
     {
@@ -86,7 +74,7 @@ unsigned char * RSAEncrypt(const unsigned char *plain, int len, size_t &outLen)
     return out;
 }
 
-unsigned char * RSADecrypt(const unsigned char *cipher, int len, size_t &outLen)
+unsigned char * RSADecrypt(RSAInfo & ri,const unsigned char *cipher, int len, size_t &outLen)
 {
     if (EVP_PKEY_decrypt(ri.priCtx, NULL, &outLen, cipher, len) <= 0)
     {
