@@ -1,5 +1,5 @@
 local M = {
-    isCrypt = false,
+    isCrypt = true,
 }
 
 return M

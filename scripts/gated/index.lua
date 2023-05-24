@@ -23,31 +23,38 @@ local function validate(fd, ipaddr)
     socket.start(fd)
     local cryptor = sep.Cryptor(cfg.isCrypt)
     local seed = RandomSeed()
-    local seedStr = string.pack("BBBBBBBBBB",table.unpack(seed))
+    local seedStr = string.pack("BBBBBBBBBB", table.unpack(seed))
     cryptor:Feed(seedStr)
-    local roundBegin =  (math.random(512)%40 + 40) & 0xFF
-    cryptor:SetRoundBegin(0,roundBegin)
-    local roundBounds = (math.random(1,512)%40 - 55) & 0xFF
-    cryptor:SetRoundBounds(0,roundBounds)
-    local str = string.pack("Bc10BBBB",cfg.isCrypt and 1 or 0,seedStr,roundBegin,0,roundBounds,0)
+    local roundBegin = (math.random(512) % 40 + 40) & 0xFF
+    cryptor:SetRoundBegin(0, roundBegin)
+    local roundBounds = (math.random(1, 512) % 40 - 55) & 0xFF
+    cryptor:SetRoundBounds(0, roundBounds)
+    local str = string.pack("Bc10BBBB", cfg.isCrypt and 1 or 0, seedStr, roundBegin, 0, roundBounds, 0)
     local data = sep.RSAEncrypt(str)
-    local res = ""
-    for i = 1, 10, 1 do
-       res = res .. string.format("%02X ",seed[i])
-    end
-    res = res .. string.format("%03X ",roundBegin) .. string.format("%03d",roundBounds) .. " " .. (roundBounds - roundBegin)
-    print("server random is :\n" .. res)
-    socket.write(fd,data)
-    local readBuf = socket.read(fd,256)
-    
+    -- local res = ""
+    -- for i = 1, 10, 1 do
+    --    res = res .. string.format("%02X ",seed[i])
+    -- end
+    -- res = res .. string.format("%03X ",roundBegin) .. string.format("%03d",roundBounds) .. " " .. (roundBounds - roundBegin)
+    --print("server random is :\n" .. res)
+    socket.write(fd, data)
+    local readBuf = socket.read(fd, 256)
+
     if not readBuf then
         socket.close(fd)
-        skynet.error("close fd ".. fd)
+        skynet.error("close fd " .. fd)
         return
     end
-   -- print("recv client: \n" .. sep.toHexString(readBuf))
+    -- print("recv client: \n" .. sep.toHexString(readBuf))
     local plain = sep.RSADecrypt(readBuf)
-    skynet.error("client random:\n" .. sep.toHexString(plain))
+    skynet.error("client random:" .. sep.toHexString(plain))
+    local clientSeed = string.sub(plain, 1, 10)
+    cryptor:Feed(clientSeed)
+    local round2Begin = string.unpack("B", string.sub(plain, 11))
+    local round2End = string.unpack("B", string.sub(plain, 12))
+    cryptor:SetRoundBegin(1,round2Begin)
+    cryptor:SetRoundBounds(1,round2End)
+    
 end
 
 skynet.start(function()
