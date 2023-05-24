@@ -5,6 +5,14 @@ local cfg = require "runcfg"
 
 local conns = {}
 
+local function Conn(fd, addr, cryptor)
+    return {
+        fd = fd,
+        addr = addr,
+        cryptor = cryptor
+    }
+end
+
 local function RandomSeed()
     local seed = {}
     if not cfg.isCrypt then
@@ -47,13 +55,21 @@ local function validate(fd, ipaddr)
     end
     -- print("recv client: \n" .. sep.toHexString(readBuf))
     local plain = sep.RSADecrypt(readBuf)
-    skynet.error("client random:" .. sep.toHexString(plain))
+    if string.len(plain) ~= 12 then
+        socket.close(fd)
+        skynet.error("client error " .. fd)
+        return
+    end
+    --skynet.error("client random:" .. sep.toHexString(plain))
     local clientSeed = string.sub(plain, 1, 10)
     cryptor:Feed(clientSeed)
     local round2Begin = string.unpack("B", string.sub(plain, 11))
+    cryptor:SetRoundBegin(1, round2Begin)
     local round2End = string.unpack("B", string.sub(plain, 12))
-    cryptor:SetRoundBegin(1,round2Begin)
-    cryptor:SetRoundBounds(1,round2End)
+    cryptor:SetRoundBounds(1, round2End)
+
+    local conn = Conn(fd, ipaddr, cryptor)
+    conns[fd] = conn
     
 end
 
