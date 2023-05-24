@@ -25,9 +25,9 @@ local function validate(fd, ipaddr)
     local seed = RandomSeed()
     local seedStr = string.pack("BBBBBBBBBB",table.unpack(seed))
     cryptor:Feed(seedStr)
-    local roundBegin = (math.random(512)%40 + 40) & 0xFF
+    local roundBegin =  (math.random(512)%40 + 40) & 0xFF
     cryptor:SetRoundBegin(0,roundBegin)
-    local roundBounds = (math.random(1,512)%40 - 55) & 0xFF --(math.random(1,512)%40 - 55) & 0xFF
+    local roundBounds = (math.random(1,512)%40 - 55) & 0xFF
     cryptor:SetRoundBounds(0,roundBounds)
     local str = string.pack("Bc10BBBB",cfg.isCrypt and 1 or 0,seedStr,roundBegin,0,roundBounds,0)
     local data = sep.RSAEncrypt(str)
@@ -35,7 +35,7 @@ local function validate(fd, ipaddr)
     for i = 1, 10, 1 do
        res = res .. string.format("%02X ",seed[i])
     end
-    res = res .. string.format("%03d ",roundBegin) .. string.format("%03d",roundBounds) .. " " .. (roundBounds - roundBegin)
+    res = res .. string.format("%03X ",roundBegin) .. string.format("%03d",roundBounds) .. " " .. (roundBounds - roundBegin)
     print("server random is :\n" .. res)
     socket.write(fd,data)
     local readBuf = socket.read(fd,256)

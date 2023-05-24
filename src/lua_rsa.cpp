@@ -125,12 +125,13 @@ int lua_RSA3Encrypt(lua_State *L)
     //std::cout << "after encrypt is " << outLen << std::endl;
     unsigned char filled[256];
     for(int i = 0;i < outLen;i++) {
-        if(buf[i] == 0x30) {
+        if(buf[i] == 0) {
             filled[i * 2] = 0x30;
+            filled[i * 2+ 1] = 0x30;
         }else {
             filled[i * 2] = 0x31;
+            filled[i * 2+ 1] = buf[i]; 
         }
-        filled[i * 2+ 1] = buf[i]; 
     }
     lua_pushlstring(L, (char *)filled, 256);
     OPENSSL_free(buf);
