@@ -108,6 +108,8 @@ add_custom_target(
   COMMAND ${CMAKE_COMMAND} -E copy_directory
           "${CMAKE_CURRENT_SOURCE_DIR}/scripts" "${COPY_TARGET}/scripts"
   COMMAND ${CMAKE_COMMAND} -E copy_directory
+          "${CMAKE_CURRENT_SOURCE_DIR}/etc" "${COPY_TARGET}/etc"
+  COMMAND ${CMAKE_COMMAND} -E copy_directory
           "${CMAKE_CURRENT_SOURCE_DIR}/config" "${COPY_TARGET}/config")
 
 add_dependencies(sephiroth liblua OpenSSL::Crypto OpenSSL::SSL)

@@ -45,15 +45,15 @@ void Cryptor::SetRoundBegin(int round, unsigned char begin)
 
 void Cryptor::Feed(unsigned char *seed, int len)
 {
-    char tmp[16];
-    for(int i = 0;i < len ;i ++)
-    {
-        memset(tmp,0,16);
-        unsigned char v = seed[i] & 0xFF;
-        sprintf(tmp,"%02X %c",v,(i + 1)%16 ==0? '\n' : ' ');
-        std::cout << tmp;
-    }
-    std::cout << std::endl;
+    // char tmp[16];
+    // for(int i = 0;i < len ;i ++)
+    // {
+    //     memset(tmp,0,16);
+    //     unsigned char v = seed[i] & 0xFF;
+    //     sprintf(tmp,"%02X %c",v,(i + 1)%16 ==0? '\n' : ' ');
+    //     std::cout << tmp;
+    // }
+    // std::cout << std::endl;
     if (!isCrypt)
     {
         return;

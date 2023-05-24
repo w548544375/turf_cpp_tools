@@ -122,8 +122,17 @@ int lua_RSA3Encrypt(lua_State *L)
     const unsigned char *msg = (const unsigned char *)luaL_checklstring(L, 1, &len);
     size_t outLen;
     unsigned char *buf = RSAEncrypt(ri,msg, len, outLen);
-    std::cout << "after encrypt is " << outLen << std::endl;
-    lua_pushlstring(L, (char *)buf, outLen);
+    //std::cout << "after encrypt is " << outLen << std::endl;
+    unsigned char filled[256];
+    for(int i = 0;i < outLen;i++) {
+        if(buf[i] == 0x30) {
+            filled[i * 2] = 0x30;
+        }else {
+            filled[i * 2] = 0x31;
+        }
+        filled[i * 2+ 1] = buf[i]; 
+    }
+    lua_pushlstring(L, (char *)filled, 256);
     OPENSSL_free(buf);
     return 1;
 }
@@ -132,9 +141,17 @@ int lua_RSA3Decrypt(lua_State *L)
 {
     size_t len;
     const unsigned char *msg = (const unsigned char *)luaL_checklstring(L, 1, &len);
+    unsigned char removePadding[128];
+    for(int i =0;i < len/2;i++) {
+        if(msg[i * 2] == 0x30) {
+            removePadding[i] = 0;
+        }else{
+            removePadding[i] = msg[i * 2 + 1];
+        }
+    } 
     size_t outLen;
-    unsigned char *buf = RSADecrypt(ri,msg, len, outLen);
-    std::cout << "after decrypt is " << outLen << std::endl;
+    unsigned char *buf = RSADecrypt(ri,removePadding, len/2, outLen);
+    //std::cout << "after decrypt is " << outLen << std::endl;
     lua_pushlstring(L, (char *)buf, outLen);
     OPENSSL_free(buf);
     return 1;
