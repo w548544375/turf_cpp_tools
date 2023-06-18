@@ -8,9 +8,11 @@ class Buffer {
 public:
   Buffer();
   Buffer(uint);
+  Buffer(const char * buf,int len);
   ~Buffer();
 
   void PutByte(char);
+  void PutBytes(const char * head,int len);
   void PutShort(short);
   void PutInt(int);
   void PutFloat(float);
@@ -22,6 +24,7 @@ public:
   void Put(Buffer *buf);
 
   char GetByte();
+  void GetBytes(char * head,int len);
   short GetShort();
   int GetInt();
   float GetFloat();
@@ -34,7 +37,8 @@ public:
   int Size() { return size; }
   int Pos() { return pos; }
   int Cap() { return capicity; }
-  unsigned char *Buf() const { return this->buff; }
+  unsigned char * Buf();
+
   void reset();
   void String(std::string &);
 

@@ -18,6 +18,7 @@ static const luaL_Reg constructors[] = {
 
 static const luaL_Reg AppDataFunc[] = {
     {"PutByte", l_putByte},
+    {"PutBytes",l_putBytes},
     {"PutShort", l_putShort},
     {"PutInt", l_putInt},
     {"PutFloat", l_putFloat},
@@ -25,12 +26,15 @@ static const luaL_Reg AppDataFunc[] = {
     {"PutDouble", l_putDouble},
     {"PutString", l_putString},
     {"GetByte", l_getByte},
+    {"GetBytes",l_getBytes},
     {"GetShort", l_getShort},
     {"GetInt", l_getInt},
     {"GetFloat", l_getFloat},
     {"GetLong", l_getLong},
     {"GetDouble", l_getDouble},
     {"GetString", l_getString},
+    {"Data",l_Buf},
+    {"Size",l_Size},
     {"ToString", l_ToString},
     {"__tostring", l_ToString},
     {"Seek", l_seek},

@@ -18,7 +18,7 @@ enum ClientMsgType {
   ENearOccupantMoved = 0xB,
   EToldAt = 0xD
 };
-
+// 描述服务器发送给客户端的消息
 class ClientMsg {
 public:
   ClientMsg(enum ClientMsgType msgType);

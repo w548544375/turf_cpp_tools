@@ -1,4 +1,3 @@
-
 #define CLIENT_TOLD 0x140A
 //  ClientBoundTheAvatar,
 #define CLIENT_BOUND_THE_AVATAR 0x1404
@@ -27,6 +26,10 @@
 
 // 0x1412 0x1414 0x1415
 
+// 客户端发送给服务端的消息
 
 // 0x140C  moveRequest  客户端发送给服务端的移动信息
 // 0x1409  Client::Tell
+#define CLIENT_READY   0x1401
+#define CLIENT_COMMAND 0x1409
+#define CLIENT_MOVEREQUEST 0x140C

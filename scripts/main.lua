@@ -49,5 +49,6 @@ local skynet = require("skynet")
 -- print("decrypted data:\n" .. sep.toHexString(decrypted))
 
 skynet.start(function()
+    skynet.newservice("crypto")
     skynet.newservice("gated")
 end)

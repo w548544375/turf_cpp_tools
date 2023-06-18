@@ -24,6 +24,7 @@ int lua_toHexString(lua_State * L) {
   const char * buf = luaL_checklstring(L,1,&len);
   std::string str;
   char temp[4];
+  std::cout << "长度:" << len << std::endl;
   for(int i =0;i < len;i++) {
     memset(temp,0,4);
     sprintf(temp,"%02X ",buf[i] & 0xFF);

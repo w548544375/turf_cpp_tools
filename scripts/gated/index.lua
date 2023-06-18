@@ -3,80 +3,147 @@ local socket = require "skynet.socket"
 local sep = require "sephiroth"
 local cfg = require "runcfg"
 
+-- fd = Conn
 local conns = {}
 
-local function Conn(fd, addr, cryptor)
-    return {
-        fd = fd,
-        addr = addr,
-        cryptor = cryptor
+local COMMANDS = {}
+
+
+local function ClientMsg()
+    local M = {
+        type = nil,
+        data =  nil,
     }
+    return M
 end
 
-local function RandomSeed()
-    local seed = {}
-    if not cfg.isCrypt then
-        for i = 1, 10, 1 do
-            seed[i] = 0
-        end
-    else
-        for i = 1, 10, 1 do
-            seed[i] = (math.random(512) % 50 + 20) & 0xFF
-        end
+local function process_msg(fd,msg)
+    skynet.error("收到客户端消息:" .. msg.type)
+    if nil ~= msg.data then
+        skynet.error("data: " .. sep.toHexString(msg.data))
     end
-    return seed
 end
 
-local function validate(fd, ipaddr)
+local function disconnect(fd)
+        -- 读取数据错误之后通知移除并关闭socket
+    skynet.error("error read from fd " .. fd)
+    conns[fd] = nil
+    socket.close(fd)
+end
+
+local  recv_loop = function(fd)
+    skynet.error("recv_loop"..fd)
+    while true do
+        local d = socket.read(fd)
+        if not d then
+            disconnect(fd)
+            return
+        end
+        local decrpyted = skynet.call(".crypto","lua","decrypt",fd,d)
+        if decrpyted.code ~= 200 then
+            disconnect(fd)
+            return
+        end
+        skynet.error(sep.toHexString(decrpyted.data))
+        local buf = sep.AppData(decrpyted.data)
+        local type = buf:GetShort()
+        local info = buf:GetShort()
+        local body = buf:GetInt()
+        buf:Seek(16)
+        local valid = buf:GetShort()
+        if type ~ info ~ body ~= valid then
+            disconnect(fd)
+            return
+        end
+        local msg = ClientMsg()
+        msg.type = type
+        local remain = info + body
+        if remain > 0 then
+            msg.data = socket.read(fd,remain)
+        end
+        process_msg(fd,msg)
+    end
+end
+
+-- 告诉客户端可以开始登录了
+local function ReadyToRoll(fd)
+    local appData = sep.AppData(22)
+    appData:PutShort(0x1403)
+    appData:PutShort(4)
+    appData:Seek(16)
+    appData:PutShort(0x1403 ~ 4 ~ 0)
+    appData:PutInt(0x10001)
+    skynet.error(sep.toHexString(appData:Data()))
+    socket.write(fd,appData:Data(),appData:Size())
+    skynet.error("ReadyToRoll"..fd)
+end
+
+local function Conn(fd, addr)
+    local m = {
+        fd = fd,
+        addr = addr
+    }
+    return m
+end
+
+local function intoSecondStage(fd)
+    local readbuf = socket.read(fd,256)
+    if not readbuf then
+        disconnect(fd)
+        return false
+    end
+    skynet.error(readbuf)
+    local ret = skynet.call(".crypto","lua","feed",fd,readbuf)
+    if  ret.code ~= 200 then
+        disconnect(fd)
+        return false
+    end
+    return true
+end
+
+local function connect(fd, ipaddr)
+    skynet.error("gated收到客户端连接->" .. fd)
     socket.start(fd)
-    local cryptor = sep.Cryptor(cfg.isCrypt)
-    local seed = RandomSeed()
-    local seedStr = string.pack("BBBBBBBBBB", table.unpack(seed))
-    cryptor:Feed(seedStr)
-    local roundBegin = (math.random(512) % 40 + 40) & 0xFF
-    cryptor:SetRoundBegin(0, roundBegin)
-    local roundBounds = (math.random(1, 512) % 40 - 55) & 0xFF
-    cryptor:SetRoundBounds(0, roundBounds)
-    local str = string.pack("Bc10BBBB", cfg.isCrypt and 1 or 0, seedStr, roundBegin, 0, roundBounds, 0)
-    local data = sep.RSAEncrypt(str)
-    -- local res = ""
-    -- for i = 1, 10, 1 do
-    --    res = res .. string.format("%02X ",seed[i])
-    -- end
-    -- res = res .. string.format("%03X ",roundBegin) .. string.format("%03d",roundBounds) .. " " .. (roundBounds - roundBegin)
-    --print("server random is :\n" .. res)
-    socket.write(fd, data)
-    local readBuf = socket.read(fd, 256)
+    local c = Conn(fd,ipaddr)
+    conns[fd] = c
+    local ret = skynet.call(".crypto","lua","init",fd)
+    socket.write(fd,ret.data)
+    if cfg.isCrypt then
+        local vertified = intoSecondStage(fd)
+        if not vertified then
+            return
+        end
+    end
+    skynet.fork(recv_loop,fd)
+end
 
-    if not readBuf then
-        socket.close(fd)
-        skynet.error("close fd " .. fd)
+
+local traceback = function (err)
+    skynet.error(tostring(err))
+    skynet.error(debug.traceback())
+end
+
+local function dispatch(session,source,cmd,...)
+    skynet.error("gated服务收到消息 ".. source .. " CMD:" .. cmd)
+    local fun = COMMANDS[cmd]
+    if not fun then
+        skynet.retpack({code = 404,msg="handler for " .. cmd ..  " not found",service =  skynet.self()})
         return
     end
-    -- print("recv client: \n" .. sep.toHexString(readBuf))
-    local plain = sep.RSADecrypt(readBuf)
-    if string.len(plain) ~= 12 then
-        socket.close(fd)
-        skynet.error("client error " .. fd)
+    local ret = table.pack(xpcall(fun,traceback,source,...))
+    local isOk = ret[1]
+    if not isOk then
+        skynet.retpack({ code = 503, msg = "handler for " .. cmd .. " run failed", service = skynet.self() })
         return
     end
-    --skynet.error("client random:" .. sep.toHexString(plain))
-    local clientSeed = string.sub(plain, 1, 10)
-    cryptor:Feed(clientSeed)
-    local round2Begin = string.unpack("B", string.sub(plain, 11))
-    cryptor:SetRoundBegin(1, round2Begin)
-    local round2End = string.unpack("B", string.sub(plain, 12))
-    cryptor:SetRoundBounds(1, round2End)
-
-    local conn = Conn(fd, ipaddr, cryptor)
-    conns[fd] = conn
-    
+    skynet.retpack(table.unpack(ret,2))
 end
 
 skynet.start(function()
+    --skynet.register(".gated")
     local server = socket.listen("0.0.0.0", 2286)
     sep.RSAInit("./config/pub_key.pem", "./config/private_key.pem")
-    socket.start(server, function(fd, ipaddr)
-        skynet.fork(validate, fd, ipaddr)
-    end)
+    skynet.dispatch('lua',dispatch)
+    socket.start(server,connect)
+    skynet.error("gated服务地址:" .. skynet.self())
 end)

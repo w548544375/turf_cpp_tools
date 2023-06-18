@@ -8,22 +8,38 @@
 
 #define DEFAULT_GROW 2
 
-#define INC_SIZE(x) if(x >= size) {size = x;}
+#define INC_SIZE(x) \
+  if (x >= size)    \
+  {                 \
+    size = x;       \
+  }
 
-Buffer::Buffer() : pos(0), size(0), capicity(DEFAULT_SIZE) {
+Buffer::Buffer() : pos(0), size(0), capicity(DEFAULT_SIZE)
+{
   buff = new unsigned char[DEFAULT_SIZE];
-  memset(buff,0,capicity);
+  memset(buff, 0, capicity);
 }
 
-Buffer::Buffer(uint l) : pos(0), size(0), capicity(l) {
+Buffer::Buffer(uint l) : pos(0), size(0), capicity(l)
+{
+  std::cout << " buffer length " << l << std::endl;
   buff = new unsigned char[l];
+}
+
+Buffer::Buffer(const char *buf, int len) : pos(0), size(len), capicity(len)
+{
+  buff = new unsigned char[len];
+  memset(buff, 0, capicity);
+  memcpy(buff, buf, len);
 }
 
 Buffer::~Buffer() { delete[] buff; }
 
-void Buffer::grow(int required) {
+void Buffer::grow(int required)
+{
   int newCap = capicity * 2;
-  if (newCap < capicity + required) {
+  if (newCap < capicity + required)
+  {
     newCap = capicity + required * 2;
   }
   unsigned char *newBuff = new unsigned char[newCap];
@@ -36,29 +52,45 @@ void Buffer::grow(int required) {
 
 bool Buffer::needGrow(int predicate) { return pos + predicate >= capicity; }
 
-void Buffer::tryGrow(int required) {
-  if (this->needGrow(required)) {
+void Buffer::tryGrow(int required)
+{
+  if (this->needGrow(required))
+  {
     this->grow(required);
   }
 }
 
-void Buffer::seek(int po) {
-  if (po >= capicity) {
+void Buffer::seek(int po)
+{
+  if (po >= capicity)
+  {
     this->pos = capicity;
-  } else {
+  }
+  else
+  {
     this->pos = po;
   }
   INC_SIZE(pos);
 }
 
-void Buffer::PutByte(char b) {
+void Buffer::PutByte(char b)
+{
   this->tryGrow(1);
   this->buff[pos] = b & 0xFF;
   this->pos += 1;
   INC_SIZE(pos);
 }
 
-void Buffer::PutShort(short v) {
+void Buffer::PutBytes(const char *head, int len)
+{
+  this->tryGrow(len);
+  memcpy((this->buff + pos), head, len);
+  this->pos += len;
+  INC_SIZE(pos);
+}
+
+void Buffer::PutShort(short v)
+{
   this->tryGrow(2);
   this->buff[pos] = (unsigned char)(v >> 0 & 0xffff);
   this->buff[pos + 1] = (unsigned char)(v >> 8 & 0xffff);
@@ -66,7 +98,8 @@ void Buffer::PutShort(short v) {
   INC_SIZE(pos);
 }
 
-void Buffer::PutInt(int v) {
+void Buffer::PutInt(int v)
+{
   this->tryGrow(4);
   this->buff[pos] = v >> 0 & 0xFFFFFFFF;
   this->buff[pos + 1] = v >> 8 & 0xFFFFFFFF;
@@ -76,7 +109,8 @@ void Buffer::PutInt(int v) {
   INC_SIZE(pos);
 }
 
-void Buffer::PutLong(long v) {
+void Buffer::PutLong(long v)
+{
   this->tryGrow(8);
   this->buff[pos] = v >> 0 & 0xFFFFFFFFFFFFFFFF;
   this->buff[pos + 1] = v >> 8 & 0xFFFFFFFFFFFFFFFF;
@@ -90,27 +124,32 @@ void Buffer::PutLong(long v) {
   INC_SIZE(pos);
 }
 
-void Buffer::PutFloat(float v) {
+void Buffer::PutFloat(float v)
+{
   this->tryGrow(4);
   unsigned char *pdata = (unsigned char *)&v;
-  for (int i = 0; i < 4; i++) {
+  for (int i = 0; i < 4; i++)
+  {
     this->buff[pos + i] = *(pdata + i);
   }
   this->pos += 4;
   INC_SIZE(pos);
 }
 
-void Buffer::PutDouble(double v) {
+void Buffer::PutDouble(double v)
+{
   this->tryGrow(8);
   const unsigned char *pdata = reinterpret_cast<const unsigned char *>(&v);
-  for (int i = 0; i < 8; i++) {
+  for (int i = 0; i < 8; i++)
+  {
     this->buff[pos + i] = *pdata++;
   }
   this->pos += 8;
   INC_SIZE(pos);
 }
 
-void Buffer::PutString(const char *v, int len) {
+void Buffer::PutString(const char *v, int len)
+{
   int length = len + 1;
   this->tryGrow(length + 4);
   this->PutInt(length);
@@ -119,17 +158,20 @@ void Buffer::PutString(const char *v, int len) {
   INC_SIZE(pos);
 }
 
-void Buffer::PutString(std::string &v) {
+void Buffer::PutString(std::string &v)
+{
   int len = v.length();
   this->PutString(v.c_str(), len);
 }
 
-void Buffer::PutString(const char *v) {
+void Buffer::PutString(const char *v)
+{
   int len = strlen(v);
   this->PutString(v, len);
 }
 
-void Buffer::Put(Buffer *buf) {
+void Buffer::Put(Buffer *buf)
+{
   this->tryGrow(buf->size);
   buf->seek(0);
   memcpy(this->buff + this->pos, buf->buff, buf->size);
@@ -137,20 +179,29 @@ void Buffer::Put(Buffer *buf) {
   INC_SIZE(pos);
 }
 
-char Buffer::GetByte() {
+char Buffer::GetByte()
+{
   char b = this->buff[this->pos];
   this->pos += 1;
   return b;
 }
 
-short Buffer::GetShort() {
+void Buffer::GetBytes(char *head, int len)
+{
+  memcpy(head, this->buff + this->pos, len);
+  this->pos += len;
+}
+
+short Buffer::GetShort()
+{
   short ret = this->buff[this->pos] & 0xFF;
   ret |= (this->buff[this->pos + 1] << 8) & 0xFF00;
   this->pos += 2;
   return ret;
 }
 
-int Buffer::GetInt() {
+int Buffer::GetInt()
+{
   int ret = this->buff[this->pos] & 0xFF;
   ret |= (this->buff[this->pos + 1] << 8) & 0xFF00;
   ret |= (this->buff[this->pos + 2] << 16) & 0xFFFF00;
@@ -159,7 +210,8 @@ int Buffer::GetInt() {
   return ret;
 }
 
-long Buffer::GetLong() {
+long Buffer::GetLong()
+{
   long ret = this->buff[this->pos] & 0xFF;
   ret |= (long)(this->buff[this->pos + 1] << 8) & 0xFF00;
   ret |= (this->buff[this->pos + 2] << 16) & 0xFF0000;
@@ -172,19 +224,22 @@ long Buffer::GetLong() {
   return ret;
 }
 
-float Buffer::GetFloat() {
+float Buffer::GetFloat()
+{
   float f = *(float *)(this->buff + this->pos);
   this->pos += 4;
   return f;
 }
 
-double Buffer::GetDouble() {
+double Buffer::GetDouble()
+{
   double d = *(double *)(this->buff + this->pos);
   this->pos += 8;
   return d;
 }
 
-void Buffer::GetString(std::string &str) {
+void Buffer::GetString(std::string &str)
+{
   int len = this->GetInt();
   char *buf = new char[len - 1];
   memcpy(buf, this->buff + this->pos, len - 1);
@@ -193,17 +248,27 @@ void Buffer::GetString(std::string &str) {
   this->pos += len;
 }
 
-void Buffer::String(std::string & str) {
+void Buffer::String(std::string &str)
+{
   char *da = new char[size * 4];
   char temp[4];
-  for (int i = 0; i < size; i++) {
+  for (int i = 0; i < size; i++)
+  {
     memset(temp, 0, 4);
     sprintf(temp, "%02X ", this->buff[i]);
     str.append(temp);
   }
 }
 
-void Buffer::reset() {
+unsigned char * Buffer::Buf()
+{
+  unsigned char * buf = new unsigned char[size];
+  memcpy(buf,buff,size);
+  return buf;
+}
+
+void Buffer::reset()
+{
   this->pos = 0;
   this->size = 0;
 }
