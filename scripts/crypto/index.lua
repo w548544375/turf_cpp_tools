@@ -26,12 +26,13 @@ COMMANDS.init = function(source, fd)
     cryptors[fd] = cryptor
     local seed = RandomSeed()
     local seedStr = string.pack("BBBBBBBBBB", table.unpack(seed))
+    --print("Server Random:" .. sep.toHexString(seedStr))
     cryptor:Feed(seedStr)
     local roundBegin = (math.random(512) % 40 + 40) & 0xFF
     cryptor:SetRoundBegin(0, roundBegin)
     local roundBounds = (math.random(1, 512) % 40 - 55) & 0xFF
     cryptor:SetRoundBounds(0, roundBounds)
-    local str = string.pack("Bc10BBBB", cfg.isCrypt and 1 or 0, seedStr, roundBegin, 0, roundBounds, 0)
+    local str = string.pack("Bc10BBBB", cfg.isCrypt and 1 or 0, seedStr, roundBegin, roundBounds, 0, 0)
     local data = sep.RSAEncrypt(str)
     return response.Success(data)
 end
@@ -45,13 +46,14 @@ COMMANDS.feed = function(source, fd, buf)
     if string.len(plain) ~= 12 then
         return response.Error(400, "error decrypt client data")
     end
-    --skynet.error("client random:" .. sep.toHexString(plain))
+    --skynet.error("client random: " .. sep.toHexString(plain))
     local clientSeed = string.sub(plain, 1, 10)
     cryptor:Feed(clientSeed)
     local round2Begin = string.unpack("B", string.sub(plain, 11))
     cryptor:SetRoundBegin(1, round2Begin)
     local round2End = string.unpack("B", string.sub(plain, 12))
     cryptor:SetRoundBounds(1, round2End)
+    --print(cryptor)
     return response.Success("")
 end
 

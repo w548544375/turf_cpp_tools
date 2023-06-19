@@ -71,6 +71,11 @@ void Cryptor::Feed(unsigned char *seed, int len)
         }
     }
 }
+/**
+ * int u = seed[i] + k;
+ * int c = table[u]
+ * table[j] = c;
+ **/
 
 void Cryptor::Encrypt(unsigned char *cipher, int len)
 {
@@ -79,9 +84,9 @@ void Cryptor::Encrypt(unsigned char *cipher, int len)
         unsigned char &begin = rounds[j].encryptIdx;
         for (int i = 0; i < len; i += 2)
         {
-            cipher[i] += cryptoTable[begin];
+            cipher[i] += cryptoTable[begin] & 0xff;
             begin += 1;
-            if (begin > rounds[j].bound)
+            if (begin >= rounds[j].bound)
             {
                 begin = rounds[j].bound;
             }
@@ -96,7 +101,7 @@ void Cryptor::Decrypt(unsigned char *cipher, int len)
         unsigned char &begin = rounds[j].decryptIdx;
         for (int i = 0; i < len; i += 2)
         {
-            cipher[i] -= cryptoTable[begin];
+            cipher[i] -= cryptoTable[begin] & 0xff;
             begin += 1;
             if (begin > rounds[j].bound)
             {

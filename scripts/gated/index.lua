@@ -3,11 +3,39 @@ local socket = require "skynet.socket"
 local sep = require "sephiroth"
 local cfg = require "runcfg"
 
--- fd = Conn
-local conns = {}
+
+local conns = {}-- fd = Conn
+
+
+local function Conn(fd, addr)
+    local m = {
+        fd = fd,
+        addr = addr,
+        playerid = nil,
+    }
+    return m
+end
+
+local function disconnect(fd)
+    -- 读取数据错误之后通知移除并关闭socket
+skynet.error("error read from fd " .. fd)
+conns[fd] = nil
+socket.close(fd)
+end
+
 
 local COMMANDS = {}
 
+COMMANDS.send_by_fd = function (source,fd,msg)
+    if not conns[fd] then
+        return
+    end
+    local ret = skynet.call(".crypto","lua","encrypt",fd,msg)
+    if ret.code ~= 200 then
+        return
+    end
+    socket.write(fd,ret.data)
+end
 
 local function ClientMsg()
     local M = {
@@ -18,23 +46,23 @@ local function ClientMsg()
 end
 
 local function process_msg(fd,msg)
-    skynet.error("收到客户端消息:" .. msg.type)
+    skynet.error("收到客户端消息:" .. string.format("%X", msg.type))
     if nil ~= msg.data then
         skynet.error("data: " .. sep.toHexString(msg.data))
     end
+    local con = conns[fd]
+    local playerid = con.playerid
+    if not playerid then
+        skynet.send(".login","lua","request_login",fd,msg)
+    end
 end
 
-local function disconnect(fd)
-        -- 读取数据错误之后通知移除并关闭socket
-    skynet.error("error read from fd " .. fd)
-    conns[fd] = nil
-    socket.close(fd)
-end
+
 
 local  recv_loop = function(fd)
     skynet.error("recv_loop"..fd)
     while true do
-        local d = socket.read(fd)
+        local d = socket.read(fd,18)
         if not d then
             disconnect(fd)
             return
@@ -44,7 +72,6 @@ local  recv_loop = function(fd)
             disconnect(fd)
             return
         end
-        skynet.error(sep.toHexString(decrpyted.data))
         local buf = sep.AppData(decrpyted.data)
         local type = buf:GetShort()
         local info = buf:GetShort()
@@ -59,32 +86,24 @@ local  recv_loop = function(fd)
         msg.type = type
         local remain = info + body
         if remain > 0 then
-            msg.data = socket.read(fd,remain)
+            local data = socket.read(fd,remain)
+            if not data then
+                disconnect(fd)
+                return
+            end
+            decrpyted = skynet.call(".crypto","lua","decrypt",fd,data)
+            if decrpyted.code ~= 200 then
+                disconnect(fd)
+                return
+            end
+            msg.data = decrpyted.data
         end
         process_msg(fd,msg)
     end
 end
 
--- 告诉客户端可以开始登录了
-local function ReadyToRoll(fd)
-    local appData = sep.AppData(22)
-    appData:PutShort(0x1403)
-    appData:PutShort(4)
-    appData:Seek(16)
-    appData:PutShort(0x1403 ~ 4 ~ 0)
-    appData:PutInt(0x10001)
-    skynet.error(sep.toHexString(appData:Data()))
-    socket.write(fd,appData:Data(),appData:Size())
-    skynet.error("ReadyToRoll"..fd)
-end
 
-local function Conn(fd, addr)
-    local m = {
-        fd = fd,
-        addr = addr
-    }
-    return m
-end
+
 
 local function intoSecondStage(fd)
     local readbuf = socket.read(fd,256)
@@ -92,7 +111,6 @@ local function intoSecondStage(fd)
         disconnect(fd)
         return false
     end
-    skynet.error(readbuf)
     local ret = skynet.call(".crypto","lua","feed",fd,readbuf)
     if  ret.code ~= 200 then
         disconnect(fd)
