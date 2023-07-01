@@ -30,7 +30,7 @@ public:
   float GetFloat();
   long GetLong();
   double GetDouble();
-  void GetString(std::string &str);
+  const char * GetString(int * len);
 
   void seek(int);
 

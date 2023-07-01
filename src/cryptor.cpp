@@ -10,6 +10,7 @@ Cryptor::Cryptor() : Cryptor(true)
 
 Cryptor::Cryptor(bool usingCrypt) : isCrypt(usingCrypt)
 {
+    memset(cryptoTable,0,256);
     if (isCrypt)
     {
         for (int i = 0; i < 256; i++)

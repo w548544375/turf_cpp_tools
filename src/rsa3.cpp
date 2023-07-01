@@ -69,8 +69,10 @@ unsigned char * RSAEncrypt(RSAInfo & ri,const unsigned char *plain, int len, siz
         std::cout << "error detemine buffer length " << std::endl;
         return 0;
     }
+    std::cout << "before" << std::endl;
     unsigned char * out = (unsigned char *)OPENSSL_malloc(outLen);
     int res = EVP_PKEY_encrypt(ri.pubCtx, out, &outLen, plain, len);
+    std::cout << "after" << std::endl;
     return out;
 }
 

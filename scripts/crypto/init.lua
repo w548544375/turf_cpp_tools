@@ -129,7 +129,10 @@ COMMANDS.encrypt = function(source, fd, msg)
     return response.Success(encrypted)
 end
 
-
+COMMANDS.RSADecrypt = function(source, fd, msg)
+    local plain = sep.RSADecrypt(msg)
+    return response.Success(plain)
+end
 
 local traceback = function(err)
     skynet.error(tostring(err))

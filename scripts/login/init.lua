@@ -2,7 +2,14 @@ local skynet = require "skynet"
 local sep = require "sephiroth"
 local response = require "response"
 local cmsg = require "messages.sepclient"
+local utils = require "utils"
 require("skynet.manager")
+
+
+-- authkey = {user = "",loaded = false}
+local keys = {}
+
+keys[88888888] = {user = "test01",loaded = false}
 
 local COMMANDS = {}
 
@@ -24,9 +31,28 @@ COMMANDS.request_login = function (source,fd,msg)
     elseif msg.type == 0x1409 then
         local ad = sep.AppData(msg.data)
         local id = ad:GetShort()
-        if id == 0x3EE then
+        if id == 0x1D then
             local login = cmsg.CLogin(ad)
-            print("login" .. login.id .. " ".. login.key .. " " .. login.version)
+            local decrpyted = skynet.call(".crypto","lua","RSADecrypt",fd,login.key)
+            login.key = decrpyted.data
+            utils.print_lua_table(login)
+            local data = sep.AppData()
+            data:PutShort(0xDA)
+            data:PutInt(0x00)
+            data:PutByte(0x0) -- 表示是否登录成功
+            data:PutString("test")
+            data:PutInt(1)
+            data:PutByte(0)
+            local clientTold = sep.ClientMsg(0,data)
+            local appData = clientTold:Serialize()
+            skynet.send(source,"lua","send_by_fd",fd,appData:Data())
+
+            local character = sep.AppData()
+            character:PutShort(0xBF)
+            character:PutInt(0x00)
+            local ct = sep.ClientMsg(0,character)
+            local characterInfo = ct:Serialize()
+            skynet.send(source,"lua","send_by_fd",fd,characterInfo:Data())
         end
     end
 end

@@ -37,6 +37,8 @@ COMMANDS.send_by_fd = function (source,fd,msg)
     socket.write(fd,ret.data)
 end
 
+
+
 local function ClientMsg()
     local M = {
         type = nil,
@@ -48,7 +50,7 @@ end
 local function process_msg(fd,msg)
     skynet.error("收到客户端消息:" .. string.format("%X", msg.type))
     if nil ~= msg.data then
-        skynet.error("data: " .. sep.toHexString(msg.data))
+        skynet.error("data[".. #msg.data .. "]:" .. sep.toHexString(msg.data))
     end
     local con = conns[fd]
     local playerid = con.playerid

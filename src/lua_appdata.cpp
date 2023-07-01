@@ -191,9 +191,10 @@ int l_getDouble(lua_State *L)
 int l_getString(lua_State *L)
 {
   AppData *buf = GetAppData(L, 1);
-  std::string str;
-  buf->GetString(str);
-  lua_pushstring(L, str.c_str());
+  int len;
+  const char * str = buf->GetString(&len);
+  lua_pushlstring(L, str,len);
+  delete str;
   return 1;
 }
 

@@ -238,14 +238,14 @@ double Buffer::GetDouble()
   return d;
 }
 
-void Buffer::GetString(std::string &str)
+const char * Buffer::GetString(int * rlen)
 {
   int len = this->GetInt();
   char *buf = new char[len - 1];
   memcpy(buf, this->buff + this->pos, len - 1);
-  str.assign(buf);
-  delete[] buf;
+  *rlen = len - 1;
   this->pos += len;
+  return buf;
 }
 
 void Buffer::String(std::string &str)
